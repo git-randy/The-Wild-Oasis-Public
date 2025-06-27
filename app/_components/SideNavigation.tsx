@@ -1,37 +1,51 @@
+"use client";
+
 import {
   CalendarDaysIcon,
   HomeIcon,
   UserIcon,
-} from '@heroicons/react/24/solid';
-import SignOutButton from './SignOutButton';
-import Link from 'next/link';
+} from "@heroicons/react/24/solid";
+import SignOutButton from "./SignOutButton";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   {
-    name: 'Home',
-    href: '/account',
-    icon: <HomeIcon className='h-5 w-5 text-primary-600' />,
+    name: "Home",
+    href: "/account",
+    icon: <HomeIcon className="h-5 w-5 text-primary-600" />,
   },
   {
-    name: 'Reservations',
-    href: '/account/reservations',
-    icon: <CalendarDaysIcon className='h-5 w-5 text-primary-600' />,
+    name: "Reservations",
+    href: "/account/reservations",
+    icon: <CalendarDaysIcon className="h-5 w-5 text-primary-600" />,
   },
   {
-    name: 'Guest profile',
-    href: '/account/profile',
-    icon: <UserIcon className='h-5 w-5 text-primary-600' />,
+    name: "Guest profile",
+    href: "/account/profile",
+    icon: <UserIcon className="h-5 w-5 text-primary-600" />,
   },
 ];
 
+const defaultLinkStyles = `py-3 px-5
+  hover:bg-primary-900 hover:text-primary-100 transition-colors
+    flex items-center gap-4 font-semibold text-primary-200`
+
+const selectedLinkStyles = `py-3 px-5 flex items-center gap-4
+  font-semibold text-accent-500`
+
 function SideNavigation() {
+  const pathname = usePathname();
+  console.info(pathname);
   return (
-    <nav className='border-r border-primary-900 h-full'>
-      <ul className='flex flex-col gap-2 h-full text-lg'>
+    <nav className="border-r border-primary-900 h-full">
+      <ul className="flex flex-col gap-2 h-full text-lg">
         {navLinks.map((link) => (
           <li key={link.name}>
             <Link
-              className={`py-3 px-5 hover:bg-primary-900 hover:text-primary-100 transition-colors flex items-center gap-4 font-semibold text-primary-200`}
+              className={
+                pathname === link.href ? selectedLinkStyles: defaultLinkStyles
+              }
               href={link.href}
             >
               {link.icon}
@@ -40,7 +54,7 @@ function SideNavigation() {
           </li>
         ))}
 
-        <li className='mt-auto'>
+        <li className="mt-auto">
           <SignOutButton />
         </li>
       </ul>

@@ -1,12 +1,25 @@
 import { Suspense } from "react";
 import CabinList from "~/app/_components/CabinList";
+import Filter from "~/app/_components/Filter";
 import Spinner from "~/app/_components/Spinner";
 
-export const metadata = {
-  title: "Cabins"
-}
+// Revalidate data every x seconds. Only applies to statically generated pages
+// export const revalidate = 3600;
+// Since searchParams was added, the page cannot know ahead of time what the
+// value will be, so this page is now dynamic and revalidating is obsolete.
 
-export default function Page() {
+export const metadata = {
+  title: "Cabins",
+};
+
+// Server components re-render whenever searchParams changes
+// (when navigation changes).
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{[key: string]: string}>;
+}) {
+  const filter = (await searchParams)?.capacity ?? "any";
 
   return (
     <div>
@@ -14,15 +27,29 @@ export default function Page() {
         Our Luxury Cabins
       </h1>
       <p className="text-primary-200 text-lg mb-10">
-        Cozy yet luxurious cabins located near the Stavanger fjords in Norway.
-        Imagine waking up to beautiful mountain views, spending your
-        days exploring the vast valleys around, or just relaxing in your private
-        hot tub under the stars. Enjoy nature&apos;s beauty in your own little
-        home away from home. The perfect spot for a peaceful, calm vacation.
+        Cozy yet luxurious cabins located in the Stavanger region of Norway.
+        Imagine waking up to beautiful views of the fjords, spending your days
+        exploring the vast inlets around, or just relaxing in your private hot
+        tub under the stars. Enjoy nature&apos;s beauty in your own little home
+        away from home. The perfect spot for a peaceful, calm vacation.
       </p>
 
-      <Suspense name="SuspendedCabinList" fallback={<Spinner text="Cabins loading..."/>}>
-        <CabinList/>
+      <div className="flex justify-end mb-8">
+        {/* Filter changes navigation based on user input */}
+        <Filter/>
+      </div>
+
+      {/*
+        Suspense will only render the fallback on inital load.
+        Assign the key prop a value which will make the fallback re-render
+        whenever the value changes
+      */}
+      <Suspense
+        name="SuspendedCabinList"
+        fallback={<Spinner text="Loading cabins..." />}
+        key={filter}
+      >
+        <CabinList filter={filter}/>
       </Suspense>
     </div>
   );

@@ -30,3 +30,10 @@ export interface UpdateBookingData {
   cabin_id?: number;
   guest_id?: number;
 }
+
+export interface BookedDatesAPIData {
+  id: number;
+  start_date: string;
+  end_date: string;
+  num_nights: number;
+};

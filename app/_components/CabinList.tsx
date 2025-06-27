@@ -1,9 +1,17 @@
 import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
 import CabinCard from "~/app/_components/CabinCard";
-import { getCabins } from "~/app/_lib/data-service";
+import { getCabins, getCabinsByCapacity } from "~/app/_lib/data-service";
+// import { unstable_noStore as noStore } from "next/cache";
 
-export default async function CabinList() {
-  const cabins: CabinAPIData[] = await getCabins();
+export default async function CabinList({filter}: {filter: string}) {
+  // Opt out of caching for this component
+  // noStore();
+  let cabins: CabinAPIData[]
+  if (filter === "any" || Number.isNaN(Number(filter))) {
+    cabins = await getCabins();
+  } else {
+    cabins = await getCabinsByCapacity(Number(filter))
+  }
 
   if (cabins.length === 0) {
     return <p>There are no cabins available for booking</p>;

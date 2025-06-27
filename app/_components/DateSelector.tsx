@@ -1,36 +1,49 @@
-import { isWithinInterval } from "date-fns";
-import { DayPicker } from "react-day-picker";
+"use client";
+
+import { useState } from "react";
+// import { isWithinInterval } from "date-fns";
+import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { BookedDatesAPIData } from "~/app/_blueprints.ts/booking";
+import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
+import { SettingsAPIData } from "~/app/_blueprints.ts/settings";
 
-function isAlreadyBooked(range, datesArr) {
-  return (
-    range.from &&
-    range.to &&
-    datesArr.some((date) =>
-      isWithinInterval(date, { start: range.from, end: range.to })
-    )
-  );
-}
+type DateSelectorProps = {
+  settings: SettingsAPIData;
+  bookings: BookedDatesAPIData[];
+  cabin: CabinAPIData;
+};
 
-function DateSelector() {
-  // CHANGE
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
+function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
+  const [range, setRange] = useState<DateRange | undefined>();
+  const { min_booking_length, max_booking_length } = settings;
+  const { regular_price, discount } = cabin;
+
+  console.log(`Min and max booking length: ${min_booking_length}, ${max_booking_length}`)
+
   const cabinPrice = 23;
-  const range = { from: null, to: null };
+  const num_nights = 15;
 
-  // SETTINGS
-  const minBookingLength = 1;
-  const maxBookingLength = 23;
+  const disabledDates = [
+    { before: new Date() },
+    ...bookings.map((booking) => {
+      return {
+        from: new Date(booking.start_date),
+        to: new Date(booking.end_date),
+      };
+    }),
+  ];
 
   return (
     <div className="flex flex-col justify-between">
       <DayPicker
         className="pt-12 place-self-center"
         mode="range"
-        min={minBookingLength + 1}
-        max={maxBookingLength}
+        onSelect={(range) => {console.log(range);setRange(range)}}
+        selected={range}
+        disabled={disabledDates}
+        min={min_booking_length}
+        max={max_booking_length}
         fromMonth={new Date()}
         fromDate={new Date()}
         toYear={new Date().getFullYear() + 5}
@@ -43,20 +56,20 @@ function DateSelector() {
           <p className="flex gap-2 items-baseline">
             {discount > 0 ? (
               <>
-                <span className="text-2xl">${regularPrice - discount}</span>
+                <span className="text-2xl">${regular_price - discount}</span>
                 <span className="line-through font-semibold text-primary-700">
-                  ${regularPrice}
+                  ${regular_price}
                 </span>
               </>
             ) : (
-              <span className="text-2xl">${regularPrice}</span>
+              <span className="text-2xl">${regular_price}</span>
             )}
             <span className="">/night</span>
           </p>
-          {numNights ? (
+          {num_nights ? (
             <>
               <p className="bg-accent-600 px-3 py-2 text-2xl">
-                <span>&times;</span> <span>{numNights}</span>
+                <span>&times;</span> <span>{num_nights}</span>
               </p>
               <p>
                 <span className="text-lg font-bold uppercase">Total</span>{" "}
@@ -66,10 +79,10 @@ function DateSelector() {
           ) : null}
         </div>
 
-        {range.from || range.to ? (
+        {range?.from || range?.to ? (
           <button
             className="border border-primary-800 py-2 px-4 text-sm font-semibold"
-            onClick={() => resetRange()}
+            onClick={() => setRange({ from: undefined, to: undefined })}
           >
             Clear
           </button>

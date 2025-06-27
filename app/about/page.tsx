@@ -1,9 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import { getTableCount } from "~/app/_lib/data-service";
 import image1 from "~/public/about-1.jpg";
+
+export const revalidate = 3600;
 
 export const metadata = {
   title: "About Us",
+};
+
+const CabinNumber = async () => {
+  const num = await getTableCount("cabins");
+
+  return (
+    <span>{num}&nbsp;</span>
+  );
 };
 
 export default function Page() {
@@ -23,10 +35,14 @@ export default function Page() {
             pleasures with family.
           </p>
           <p>
-            Our luxury cabins provide a cozy base, but the real freedom and
-            peace you&apos;ll find in the surrounding mountains. Wander through
-            lush forests, breathe in the fresh air, and watch the stars twinkle
-            above from the warmth of a campfire or your hot tub.
+            Our&nbsp;
+            <Suspense name="cabinNumber" fallback={""}>
+              <CabinNumber/>
+            </Suspense>
+            luxury cabins provide a cozy base, but the real freedom and peace
+            you&apos;ll find in the surrounding mountains. Wander through lush
+            forests, breathe in the fresh air, and watch the stars twinkle above
+            from the warmth of a campfire or your hot tub.
           </p>
           <p>
             This is where memorable moments are made, surrounded by

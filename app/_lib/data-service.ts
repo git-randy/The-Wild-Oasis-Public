@@ -1,7 +1,15 @@
-import { eachDayOfInterval } from "date-fns";
 import { supabase } from "@lib/supabase";
-import { GuestAPIData, NewGuest, UpdateGuestData } from "~/app/_blueprints.ts/guest";
-import { BookingAPIData, NewBooking, UpdateBookingData } from "~/app/_blueprints.ts/booking";
+import {
+  GuestAPIData,
+  NewGuest,
+  UpdateGuestData,
+} from "~/app/_blueprints.ts/guest";
+import {
+  BookedDatesAPIData,
+  BookingAPIData,
+  NewBooking,
+  UpdateBookingData,
+} from "~/app/_blueprints.ts/booking";
 import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
 import { SettingsAPIData } from "~/app/_blueprints.ts/settings";
 
@@ -53,6 +61,40 @@ export const getCabins = async function (): Promise<CabinAPIData[]> {
   return data;
 };
 
+export async function getCabinsByCapacity(
+  capacity: number
+): Promise<CabinAPIData[]> {
+  const max = 10;
+
+  if (capacity > max) return [];
+
+  const { data, error } = await supabase
+    .from("cabins")
+    .select("id, name, max_capacity, regular_price, discount, image")
+    .eq("max_capacity", capacity)
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabins could not be loaded");
+  }
+
+  return data;
+}
+
+export async function getTableCount(table: string): Promise<number | null> {
+  // When head is set to true, data will not be returned
+  const { count, error } = await supabase
+    .from(table)
+    .select("*", { count: "estimated", head: true });
+
+  if (error) {
+    console.error(error);
+    throw new Error("Unable to get number of cabins");
+  }
+  return count;
+}
+
 // Guests are uniquely identified by their email address
 export async function getGuest(email: string): Promise<GuestAPIData> {
   const { data } = await supabase
@@ -98,7 +140,9 @@ export async function getBookings(guestId: number) {
   return data;
 }
 
-export async function getBookedDatesByCabinId(cabinId: number) {
+export async function getBookedDatesByCabinId(
+  cabinId: number
+): Promise<BookedDatesAPIData[]> {
   const currentDate = new Date();
   currentDate.setUTCHours(0, 0, 0, 0);
   const today = currentDate.toISOString();
@@ -106,29 +150,23 @@ export async function getBookedDatesByCabinId(cabinId: number) {
   // Getting all bookings
   const { data, error } = await supabase
     .from("bookings")
-    .select("*")
-    .eq("cabinId", cabinId)
-    .or(`startDate.gte.${today},status.eq.checked-in`);
+    .select("id, start_date, end_date, num_nights")
+    .eq("cabin_id", cabinId)
+    .gte("start_date", today);
 
   if (error) {
     console.error(error);
-    throw new Error("Bookings could not get loaded");
+    throw new Error(`Could not get bookings for cabin id ${cabinId}`);
   }
 
   // Converting to actual dates to be displayed in the date picker
-  const bookedDates = data
-    .map((booking) => {
-      return eachDayOfInterval({
-        start: new Date(booking.startDate),
-        end: new Date(booking.endDate),
-      });
-    })
-    .flat();
 
-  return bookedDates;
+  return data;
 }
 
 export async function getSettings(): Promise<SettingsAPIData> {
+  await new Promise((res) => setTimeout(res, 2000));
+
   const { data, error } = await supabase.from("settings").select("*").single();
 
   if (error) {
@@ -139,7 +177,13 @@ export async function getSettings(): Promise<SettingsAPIData> {
   return data;
 }
 
-export async function getCountries() {
+type CountriesData = {
+  name: string;
+  flag: string;
+  independent: boolean;
+};
+
+export async function getCountries(): Promise<CountriesData[]> {
   try {
     const res = await fetch(
       "https://restcountries.com/v2/all?fields=name,flag"

@@ -1,6 +1,8 @@
-function ReservationForm() {
+import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
+
+function ReservationForm({cabin}: {cabin: CabinAPIData}) {
   // CHANGE
-  const maxCapacity = 23;
+  const {max_capacity} = cabin
 
   return (
     <div className='scale-[1.01]'>
@@ -31,7 +33,7 @@ function ReservationForm() {
             <option value='' key=''>
               Select number of guests...
             </option>
-            {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((x) => (
+            {Array.from({ length: max_capacity }, (_, i) => i + 1).map((x) => (
               <option value={x} key={x}>
                 {x} {x === 1 ? 'guest' : 'guests'}
               </option>
