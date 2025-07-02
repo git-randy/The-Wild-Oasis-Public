@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import CabinList from "~/app/_components/CabinList";
 import Filter from "~/app/_components/Filter";
+import ReservationReminder from "~/app/_components/ReservationReminder";
 import Spinner from "~/app/_components/Spinner";
 
 // Revalidate data every x seconds. Only applies to statically generated pages
@@ -50,6 +51,7 @@ export default async function Page({
         key={filter}
       >
         <CabinList filter={filter}/>
+        <ReservationReminder/>
       </Suspense>
     </div>
   );

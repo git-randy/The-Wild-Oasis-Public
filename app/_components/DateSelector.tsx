@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-// import { isWithinInterval } from "date-fns";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { BookedDatesAPIData } from "~/app/_blueprints.ts/booking";
 import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
 import { SettingsAPIData } from "~/app/_blueprints.ts/settings";
+import { useReservation } from "~/app/_components/ReservationContext";
+import { datesOverlap, getBookedDatesByMonth } from "~/app/_lib/utilities";
 
 type DateSelectorProps = {
   settings: SettingsAPIData;
@@ -15,17 +15,16 @@ type DateSelectorProps = {
 };
 
 function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
-  const [range, setRange] = useState<DateRange | undefined>();
+  const { dateRange, setDateRange, clearDateRange } = useReservation();
   const { min_booking_length, max_booking_length } = settings;
   const { regular_price, discount } = cabin;
 
-  console.log(`Min and max booking length: ${min_booking_length}, ${max_booking_length}`)
-
-  const cabinPrice = 23;
-  const num_nights = 15;
-
-  const disabledDates = [
-    { before: new Date() },
+  const currentDate = new Date();
+  const farthestReservationDate = new Date(
+    currentDate.getFullYear() + 2,
+    currentDate.getMonth()
+  );
+  const bookedDates = [
     ...bookings.map((booking) => {
       return {
         from: new Date(booking.start_date),
@@ -33,22 +32,61 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
       };
     }),
   ];
+  const cabinPrice = 23;
+  const num_nights = 15;
+
+  const disabledDates = [{ before: new Date() }, ...bookedDates];
+
+  const handleOnSelect = (range: DateRange | undefined) => {
+    // Get only booked dates in the relevant month(s) the user has selected
+    if (range?.from && range?.to) {
+      const relevantDates = getBookedDatesByMonth(
+        range.from.getMonth(),
+        range.to.getMonth(),
+        bookedDates
+      );
+
+      if (relevantDates.length > 0) {
+        const overlaps = relevantDates.map((bookedRange) => {
+          // Don't know why typescript complains about range.property possibly
+          // being undefined since it has to be defined to get past the
+          // previous if statement
+          return datesOverlap(
+            { from: range.from!, to: range.to! },
+            bookedRange!
+          );
+        });
+        // react day picker will include disabled dates if using range mode.
+        // If overlaps, reset user selection to the last picked date as start date
+        if (overlaps.includes(true)) {
+          setDateRange({ from: range.to, to: undefined });
+          return;
+        }
+      }
+    }
+
+    setDateRange(range);
+  };
 
   return (
     <div className="flex flex-col justify-between">
       <DayPicker
         className="pt-12 place-self-center"
         mode="range"
-        onSelect={(range) => {console.log(range);setRange(range)}}
-        selected={range}
+        onSelect={handleOnSelect}
+        selected={dateRange}
         disabled={disabledDates}
         min={min_booking_length}
         max={max_booking_length}
-        fromMonth={new Date()}
-        fromDate={new Date()}
-        toYear={new Date().getFullYear() + 5}
-        captionLayout="dropdown"
+        startMonth={currentDate}
+        endMonth={farthestReservationDate}
+        captionLayout="dropdown-years"
         numberOfMonths={2}
+        styles={{
+          months: { width: "30rem" },
+          day: { width: "32px", height: "32px" },
+          day_button: { width: "30px", height: "30px" },
+        }}
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
@@ -79,10 +117,10 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
           ) : null}
         </div>
 
-        {range?.from || range?.to ? (
+        {dateRange?.from || dateRange?.to ? (
           <button
             className="border border-primary-800 py-2 px-4 text-sm font-semibold"
-            onClick={() => setRange({ from: undefined, to: undefined })}
+            onClick={clearDateRange}
           >
             Clear
           </button>
