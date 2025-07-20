@@ -36,7 +36,6 @@ const selectedLinkStyles = `py-3 px-5 flex items-center gap-4
 
 function SideNavigation() {
   const pathname = usePathname();
-  console.info(pathname);
   return (
     <nav className="border-r border-primary-900 h-full">
       <ul className="flex flex-col gap-2 h-full text-lg">

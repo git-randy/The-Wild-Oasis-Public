@@ -1,5 +1,5 @@
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
-import { GuestAPIData } from "~/app/_blueprints.ts/guest";
+import { CabinAPIData, CabinData } from "~/app/_blueprints/cabin";
+import { GuestAPIData } from "~/app/_blueprints/guest";
 
 export interface BookingAPIData {
   id: number;
@@ -12,6 +12,32 @@ export interface BookingAPIData {
   status: "unconfirmed" | "checked-in" | "checked-out";
   cabins?: CabinAPIData;
   guests?: GuestAPIData;
+}
+
+export interface BookingWithCabins {
+  id?: number;
+  created_at: string;
+  start_date: string;
+  end_date: string;
+  num_nights: number;
+  total_price: number;
+  num_guests: number;
+  cabins: CabinData[];
+  guest_id: number;
+  cabin_id: number;
+}
+
+export interface BookingWithCabin {
+  id: number;
+  created_at: string;
+  start_date: string;
+  end_date: string;
+  num_nights: number;
+  total_price: number;
+  num_guests: number;
+  cabins: CabinData;
+  guest_id: number;
+  cabin_id: number;
 }
 
 export interface NewBooking

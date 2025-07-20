@@ -1,4 +1,4 @@
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
+import { CabinAPIData } from "~/app/_blueprints/cabin";
 import DateSelector from "~/app/_components/DateSelector";
 import ReservationForm from "~/app/_components/ReservationForm";
 import { getBookedDatesByCabinId, getSettings } from "~/app/_lib/data-service";

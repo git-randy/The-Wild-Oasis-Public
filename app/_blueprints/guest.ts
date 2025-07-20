@@ -12,8 +12,8 @@ export interface NewGuest {
   full_name: string;
   email: string;
   national_id?: number;
-  nationality: string;
-  country_flag: string;
+  nationality?: string;
+  country_flag?: string;
   first_name?: string;
   last_name?: string;
 }
@@ -26,4 +26,8 @@ export interface UpdateGuestData {
   country_flag?: string;
   first_name?: string;
   last_name?: string;
+}
+
+export interface UpdateProfileData {
+  national_id: string;
 }

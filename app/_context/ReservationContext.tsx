@@ -32,7 +32,7 @@ function ReservationProvider({children}: {children: React.ReactNode}) {
 function useReservation() {
   const context = useContext(ReservationContext)
 
-  if (!context) throw new Error("Context was used outside provider")
+  if (!context) throw new Error("Context was used outside of ReservationProvider")
 
   return context
 }

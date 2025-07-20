@@ -3,15 +3,16 @@ import {
   GuestAPIData,
   NewGuest,
   UpdateGuestData,
-} from "~/app/_blueprints.ts/guest";
+} from "~/app/_blueprints/guest";
 import {
   BookedDatesAPIData,
   BookingAPIData,
+  BookingWithCabin,
   NewBooking,
   UpdateBookingData,
-} from "~/app/_blueprints.ts/booking";
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
-import { SettingsAPIData } from "~/app/_blueprints.ts/settings";
+} from "~/app/_blueprints/booking";
+import { CabinAPIData } from "~/app/_blueprints/cabin";
+import { SettingsAPIData } from "~/app/_blueprints/settings";
 
 /////////////
 // GET
@@ -107,7 +108,20 @@ export async function getGuest(email: string): Promise<GuestAPIData> {
   return data;
 }
 
-export async function getBooking(id: number) {
+export async function getGuestId(
+  email: string
+): Promise<{ id: number } | null> {
+  const { data } = await supabase
+    .from("guests")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  // No error here! We handle the possibility of no guest in the sign in callback
+  return data;
+}
+
+export async function getBookingById(id: number) {
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -122,22 +136,45 @@ export async function getBooking(id: number) {
   return data;
 }
 
-export async function getBookings(guestId: number) {
+export async function bookingOwnedByGuest(email: string, bookingId: number) {
+
+  const guest = await getGuestId(email)
+
+  if (!guest) throw new Error(`Could not find guest id for ${email}`)
+
   const { data, error } = await supabase
     .from("bookings")
-    // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
+    .select("id")
+    .match({ guest_id: guest.id, id: bookingId })
+    .single();
+
+  if (error || data === null) {
+    console.error(error.details);
+    return false;
+  } else {
+    return true;
+  }
+}
+
+export async function getBookings(
+  guestId: number
+): Promise<BookingWithCabin[]> {
+  const { data, error } = await supabase
+    .from("bookings")
+    // We actually also need data on the cabins as well. But let's ONLY take the
+    // data that we actually need, in order to reduce downloaded data.
     .select(
       "id, created_at, start_date, end_date, num_nights, num_guests, total_price, guest_id, cabin_id, cabins(name, image)"
     )
-    .eq("guestId", guestId)
-    .order("startDate");
+    .eq("guest_id", guestId)
+    .order("start_date");
 
   if (error) {
     console.error(error);
     throw new Error(`Could not find booking with guest id ${guestId}`);
   }
 
-  return data;
+  return data as unknown as BookingWithCabin[];
 }
 
 export async function getBookedDatesByCabinId(
@@ -165,8 +202,6 @@ export async function getBookedDatesByCabinId(
 }
 
 export async function getSettings(): Promise<SettingsAPIData> {
-  await new Promise((res) => setTimeout(res, 2000));
-
   const { data, error } = await supabase.from("settings").select("*").single();
 
   if (error) {
@@ -267,12 +302,14 @@ export async function updateBooking(
 /////////////
 // DELETE
 
-export async function deleteBooking(id: number): Promise<null> {
-  const { data, error } = await supabase.from("bookings").delete().eq("id", id);
+export async function deleteBooking(
+  id: number
+): Promise<{ success: boolean; error: string }> {
+  const { error } = await supabase.from("bookings").delete().eq("id", id);
 
   if (error) {
-    console.error(error);
-    throw new Error("Booking could not be deleted");
+    return { success: false, error: error.details };
+  } else {
+    return { success: true, error: "" };
   }
-  return data;
 }

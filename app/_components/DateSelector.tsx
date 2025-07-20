@@ -2,10 +2,10 @@
 
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { BookedDatesAPIData } from "~/app/_blueprints.ts/booking";
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
-import { SettingsAPIData } from "~/app/_blueprints.ts/settings";
-import { useReservation } from "~/app/_components/ReservationContext";
+import { BookedDatesAPIData } from "~/app/_blueprints/booking";
+import { CabinAPIData } from "~/app/_blueprints/cabin";
+import { SettingsAPIData } from "~/app/_blueprints/settings";
+import { useReservation } from "~/app/_context/ReservationContext";
 import { datesOverlap, getBookedDatesByMonth } from "~/app/_lib/utilities";
 
 type DateSelectorProps = {
@@ -48,7 +48,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
 
       if (relevantDates.length > 0) {
         const overlaps = relevantDates.map((bookedRange) => {
-          // Don't know why typescript complains about range.property possibly
+          // Don't know why typescript complains about range.<property> possibly
           // being undefined since it has to be defined to get past the
           // previous if statement
           return datesOverlap(
