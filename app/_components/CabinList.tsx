@@ -1,4 +1,4 @@
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
+import { CabinAPIData } from "~/app/_blueprints/cabin";
 import CabinCard from "~/app/_components/CabinCard";
 import { getCabins, getCabinsByCapacity } from "~/app/_lib/data-service";
 // import { unstable_noStore as noStore } from "next/cache";

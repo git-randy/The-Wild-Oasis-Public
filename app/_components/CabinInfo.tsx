@@ -1,6 +1,6 @@
 import { EyeSlashIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/solid"
 import Image from "next/image"
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin"
+import { CabinAPIData } from "~/app/_blueprints/cabin"
 import TextExpander from "~/app/_components/TextExpander"
 import noImage from "~/public/no-image.jpg"
 

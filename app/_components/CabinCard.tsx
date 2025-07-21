@@ -1,7 +1,7 @@
 import { UsersIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
-import { CabinAPIData } from "~/app/_blueprints.ts/cabin";
+import { CabinAPIData } from "~/app/_blueprints/cabin";
 import noImage from "~/public/no-image.jpg";
 
 function CabinCard({ cabin }: { cabin: CabinAPIData }) {
