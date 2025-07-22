@@ -6,6 +6,13 @@ export const metadata = {
 
 export default async function Page() {
   const session = await auth()
+
   console.log(session?.guestId)
-  return <div>page</div>;
+
+  return (
+    <div className="max-w-6xl mx-auto mt-8">
+      Edit Reservation page
+    </div>
+  )
+
 }

@@ -59,3 +59,13 @@
   --rdp-range_end-color: red !important;
   margin: 0 !important;
 }
+
+/* https://stackoverflow.com/a/20231370/4363111 */
+.disabled-date {
+  background: url(
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' preserveAspectRatio='none' viewBox='0 0 100 100'><path d='M0 99 L99 0 L100 3 L3 100' fill='white' /></svg>");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 70% 70%;
+  color: rgba(255,255,255, 0.3)
+}

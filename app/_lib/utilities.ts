@@ -16,7 +16,7 @@ export function getEndOfYear(years: number): Date {
 }
 
 type Interval = {
-  from: Date ;
+  from: Date;
   to: Date;
 };
 
@@ -26,16 +26,25 @@ export function datesOverlap(range1: Interval, range2: Interval): boolean {
 
 type BookedDates = { from: Date; to: Date }[];
 
-export function getBookedDatesByMonth(startMonth: number, endMonth: number, bookedDates: BookedDates) {
+export function getBookedDatesByMonth(
+  startMonth: number,
+  endMonth: number,
+  bookedDates: BookedDates
+) {
   /**
    * @param {number} month - Zero based indexing (0 = January)
    */
 
   const relevantDates = bookedDates.flatMap((range) => {
-    if (range.from.getMonth() === startMonth || range.to.getMonth() === endMonth) {
-      return range
-    } else {return []} // Do not add element to array if conditions are not met
-  })
+    if (
+      range.from.getMonth() === startMonth ||
+      range.to.getMonth() === endMonth
+    ) {
+      return range;
+    } else {
+      return [];
+    } // Do not add element to array if conditions are not met
+  });
 
-  return relevantDates
+  return relevantDates;
 }
