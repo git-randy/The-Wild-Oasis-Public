@@ -1,7 +1,6 @@
 "use client";
 
 import { differenceInDays } from "date-fns";
-import { useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { BookedDatesAPIData } from "~/app/_blueprints/booking";
@@ -17,10 +16,16 @@ type DateSelectorProps = {
 };
 
 function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
-  const [numNights, setNumNights] = useState(0);
-  const { dateRange, setDateRange, clearDateRange } = useReservation();
+  const {
+    reservation,
+    setDateRange,
+    clearDateRange,
+    setCabinName,
+    setCabinId,
+    setNumNights,
+  } = useReservation();
   const { min_booking_length, max_booking_length } = settings;
-  const { regular_price, discount } = cabin;
+  const { regular_price, discount, name: cabinName, id: cabinId } = cabin;
 
   const currentDate = new Date();
   const farthestReservationDate = new Date(
@@ -59,6 +64,14 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
     return false;
   };
 
+  const persistCabinData = () => {
+    /**
+     * Save cabin info for the reminder component into the Reservation context
+     */
+    setCabinName(cabinName);
+    setCabinId(cabinId);
+  };
+
   const handleClear = () => {
     clearDateRange();
     setNumNights(0);
@@ -72,6 +85,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
         return;
       } else {
         setNumNights(differenceInDays(range.to, range.from));
+        persistCabinData();
       }
     }
     setDateRange(range);
@@ -83,7 +97,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
         className="pt-12 place-self-center"
         mode="range"
         onSelect={handleOnSelect}
-        selected={dateRange}
+        selected={reservation.dateRange}
         disabled={disabledDates}
         min={min_booking_length}
         max={max_booking_length}
@@ -91,6 +105,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
         endMonth={farthestReservationDate}
         captionLayout="dropdown-years"
         numberOfMonths={2}
+        timeZone="America/New_York"
         styles={{
           months: { width: "30rem" },
           day: { width: "32px", height: "32px" },
@@ -116,22 +131,22 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
             )}
             <span className="">/night</span>
           </p>
-          {numNights ? (
+          {reservation.numNights ? (
             <>
               <p className="bg-accent-600 px-3 py-2 text-2xl">
-                <span>&times;</span> <span>{numNights}</span>
+                <span>&times;</span> <span>{reservation.numNights}</span>
               </p>
               <p>
                 <span className="text-lg font-bold uppercase">Total</span>{" "}
                 <span className="text-2xl font-semibold">
-                  ${(regular_price - discount) * numNights}
+                  ${(regular_price - discount) * reservation.numNights}
                 </span>
               </p>
             </>
           ) : null}
         </div>
 
-        {dateRange?.from || dateRange?.to ? (
+        {reservation.dateRange?.from || reservation.dateRange?.to ? (
           <button
             className="border border-primary-800 py-2 px-4 text-sm font-semibold"
             onClick={handleClear}

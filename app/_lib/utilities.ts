@@ -48,3 +48,13 @@ export function getBookedDatesByMonth(
 
   return relevantDates;
 }
+
+export function removeTimezone(date: Date): string {
+
+  if (!(date instanceof Date)) {
+    return new Date(date).toISOString().split(".")[0].replace("T", " ")
+  } else {
+    return date.toISOString().split(".")[0].replace("T", " ")
+  }
+
+}

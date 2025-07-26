@@ -10,10 +10,10 @@ async function Reservation({ cabin }: { cabin: CabinAPIData }) {
   ]);
 
   return (
-    <div className="grid grid-cols-2 border border-primary-800 min-h-[400px] w-full">
-      <DateSelector settings={settings} bookings={bookedDates} cabin={cabin} />
-      <ReservationForm cabin={cabin} />
-    </div>
+      <div className="grid grid-cols-2 border border-primary-800 min-h-[400px] w-full">
+        <DateSelector settings={settings} bookings={bookedDates} cabin={cabin} />
+        <ReservationForm cabin={cabin} />
+      </div>
   );
 }
 

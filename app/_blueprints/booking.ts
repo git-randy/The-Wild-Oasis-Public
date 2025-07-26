@@ -10,6 +10,11 @@ export interface BookingAPIData {
   total_price: number;
   num_guests: number;
   status: "unconfirmed" | "checked-in" | "checked-out";
+  has_breakfast?: boolean;
+  extras_price?: number;
+  cabin_price?: number;
+  is_paid?: boolean;
+  observations?: string;
   cabins?: CabinAPIData;
   guests?: GuestAPIData;
 }

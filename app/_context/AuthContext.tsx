@@ -2,12 +2,13 @@
 
 import { createContext, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { User } from "next-auth";
+import { Session, User } from "next-auth";
 
 type AuthContextType = {
   user: User | undefined;
   status: "authenticated" | "loading" | "unauthenticated";
   setUser: Dispatch<SetStateAction<User | undefined>>
+  session: Session | null
 } | null;
 
 const AuthContext = createContext<AuthContextType>(null);
@@ -23,7 +24,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [status, session?.user])
 
   return (
-    <AuthContext.Provider value={{ user, status, setUser }}>
+    <AuthContext.Provider value={{ user, status, setUser, session }}>
       {children}
     </AuthContext.Provider>
   );

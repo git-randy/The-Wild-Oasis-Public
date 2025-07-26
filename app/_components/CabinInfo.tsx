@@ -17,6 +17,7 @@ function CabinInfo({cabin}: {cabin: CabinAPIData}) {
             fill
             className="object-cover"
             alt={`Cabin ${name}`}
+            priority
           />
         </div>
 
