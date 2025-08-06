@@ -1,39 +1,46 @@
 "use client";
 
+import { useState } from "react";
+import { BookingData } from "~/app/_blueprints/booking";
 import { CabinAPIData } from "~/app/_blueprints/cabin";
 import LoginMessage from "~/app/_components/LoginMessage";
 import SubmitButton from "~/app/_components/SubmitButton";
 import { useAuth } from "~/app/_context/AuthContext";
-import { useReservation } from "~/app/_context/ReservationContext";
-import { createReservation } from "~/app/_lib/actions";
+import { useEdit } from "~/app/_context/EditContext";
+import { updateReservation } from "~/app/_lib/actions";
 
-function ReservationForm({ cabin }: { cabin: CabinAPIData }) {
-  const { setGuests, setObservations, clearReservationContext, reservation } =
-    useReservation();
+function EditReservationForm({
+  cabin,
+  reservation,
+}: {
+  cabin: CabinAPIData;
+  reservation: BookingData;
+}) {
   const { max_capacity, regular_price } = cabin;
   const { user } = useAuth();
   const bulletPoint = "\u2022";
+  const { editReservation: edit } = useEdit();
+  const [guests, setGuests] = useState<string>(String(reservation.num_guests));
+  const [observations, setObservations] = useState<string>(
+    reservation.observations
+  );
 
   if (!user) {
     return <LoginMessage />;
   } else {
     return (
-      <div className="scale-[1.01]">
-        <div
-          className="bg-primary-800 text-primary-300 px-16 py-2 flex
-          justify-between items-center"
-        >
-          <p>
-            {user?.name ? `Logged in as ${user.name}` : "You have no name?"}
-          </p>
-        </div>
-
+      <div className="scale-[1.0]">
         <form
           className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col"
           action={() =>
-            createReservation({ ...reservation, cabinPrice: regular_price })
+            updateReservation({
+              ...edit,
+              id: reservation.id,
+              cabinPrice: regular_price,
+              observations,
+              guests: Number(guests),
+            })
           }
-          onSubmit={clearReservationContext}
         >
           <div className="space-y-2">
             <label htmlFor="numGuests">How many guests?</label>
@@ -42,8 +49,8 @@ function ReservationForm({ cabin }: { cabin: CabinAPIData }) {
               id="numGuests"
               className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
               required
-              value={reservation.guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
             >
               <option value="" key="">
                 Select number of guests...
@@ -65,8 +72,8 @@ function ReservationForm({ cabin }: { cabin: CabinAPIData }) {
             <textarea
               name="observations"
               id="observations"
-              defaultValue={reservation.observations}
-              onBlur={(e) => setObservations(e.target.value)}
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
               className="px-5 py-3 bg-primary-200 text-primary-800 w-full
               shadow-sm rounded-sm"
               placeholder="Any pets, allergies, special requirements, etc.?"
@@ -76,20 +83,14 @@ function ReservationForm({ cabin }: { cabin: CabinAPIData }) {
           <div className="flex justify-end items-center gap-6">
             <div className="flex flex-col">
               <p className="text-primary-300 text-base">
-                {!reservation.dateRange?.to &&
-                  `${bulletPoint} Select a date range`}
+                {!edit.dateRange?.to && `${bulletPoint} Select a date range`}
               </p>
               <p className="text-primary-300 text-base">
-                {!reservation.guests &&
+                {!guests &&
                   `${bulletPoint} Select number of guests staying`}
               </p>
             </div>
-            <SubmitButton
-              pendingText="Booking..."
-              disabled={!reservation.guests || !reservation.dateRange?.to}
-            >
-              Reserve now
-            </SubmitButton>
+            <SubmitButton disabled={!edit.dateRange?.to || !guests}>Submit Changes</SubmitButton>
           </div>
         </form>
       </div>
@@ -97,4 +98,4 @@ function ReservationForm({ cabin }: { cabin: CabinAPIData }) {
   }
 }
 
-export default ReservationForm;
+export default EditReservationForm;

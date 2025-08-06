@@ -12,9 +12,8 @@ const initialDateRange: DateRange = {
   from: undefined,
 };
 
-export type Reservation = {
-  cabinId: number;
-  cabinName?: string;
+export type EditReservation = {
+  id: number | null;
   guests: number;
   observations: string;
   totalPrice: number;
@@ -26,9 +25,8 @@ export type Reservation = {
   guestId?: number;
 };
 
-const initialState: Reservation = {
-  cabinId: 0,
-  cabinName: "",
+const initalState: EditReservation = {
+  id: null,
   guests: 0,
   observations: "",
   totalPrice: 0,
@@ -40,8 +38,8 @@ const initialState: Reservation = {
   guestId: undefined
 };
 
-type ReservationContextType = {
-  reservation: Reservation;
+type EditContextType = {
+  editReservation: EditReservation;
   clearDateRange: () => void;
   setDateRange: (arg1: DateRange | undefined) => void;
   setCabinName: (arg1: string) => void;
@@ -50,11 +48,10 @@ type ReservationContextType = {
   setTotalPrice: (arg1: number) => void;
   setCabinId: (arg1: number) => void;
   setNumNights: (arg1: number) => void;
-  clearReservationContext: () => void;
 };
 
-const ReservationContext = createContext<ReservationContextType>({
-  reservation: initialState,
+const EditContext = createContext<EditContextType>({
+  editReservation: initalState,
   clearDateRange: () => {},
   setDateRange: () => {},
   setCabinName: () => {},
@@ -62,53 +59,48 @@ const ReservationContext = createContext<ReservationContextType>({
   setObservations: () => {},
   setTotalPrice: () => {},
   setCabinId: () => {},
-  setNumNights: () => {},
-  clearReservationContext: () => {}
+  setNumNights: () => {}
 });
 
-function ReservationProvider({ children }: { children: React.ReactNode }) {
-  const [reservation, setReservation] = useState<Reservation>(initialState);
+function EditProvider({ children }: { children: React.ReactNode }) {
+  const [editReservation, setEditReservation] = useState<EditReservation>(initalState);
 
   const setDateRange = (dateRange: DateRange | undefined) => {
-    setReservation(prev => ({...prev, dateRange}))
+    setEditReservation(prev => ({...prev, dateRange}))
   }
 
   const clearDateRange = () => {
-    setReservation(prev => ({...prev, dateRange: initialDateRange}));
+    setEditReservation(prev => ({...prev, dateRange: initialDateRange}));
   };
 
   const setCabinName = (cabinName: string) => {
-    setReservation((prev) => ({ ...prev, cabinName }));
+    setEditReservation((prev) => ({ ...prev, cabinName }));
   };
 
   const setCabinId = (cabinId: number) => {
-    setReservation((prev) => ({ ...prev, cabinId }));
+    setEditReservation((prev) => ({ ...prev, cabinId }));
   };
 
   const setGuests = (guests: number) => {
-    setReservation((prev) => ({ ...prev, guests }));
+    setEditReservation((prev) => ({ ...prev, guests }));
   };
 
   const setObservations = (observations: string) => {
-    setReservation((prev) => ({ ...prev, observations }));
+    setEditReservation((prev) => ({ ...prev, observations }));
   };
 
   const setTotalPrice = (totalPrice: number) => {
-    setReservation((prev) => ({ ...prev, totalPrice }));
+    setEditReservation((prev) => ({ ...prev, totalPrice }));
   };
 
   const setNumNights = (numNights: number) => {
-    setReservation((prev) => ({ ...prev, numNights }));
+    setEditReservation((prev) => ({ ...prev, numNights }));
   };
 
-  const clearReservationContext = () => {
-    setReservation(initialState)
-  }
-
   return (
-    <ReservationContext.Provider
+    <EditContext.Provider
       value={{
-        reservation,
+        editReservation,
         clearDateRange,
         setDateRange,
         setCabinName,
@@ -117,21 +109,20 @@ function ReservationProvider({ children }: { children: React.ReactNode }) {
         setTotalPrice,
         setCabinId,
         setNumNights,
-        clearReservationContext
       }}
     >
       {children}
-    </ReservationContext.Provider>
+    </EditContext.Provider>
   );
 }
 
-function useReservation() {
-  const context = useContext(ReservationContext);
+function useEdit() {
+  const context = useContext(EditContext);
 
   if (!context)
-    throw new Error("Context was used outside of ReservationProvider");
+    throw new Error("Context was used outside of EditProvider");
 
   return context;
 }
 
-export { ReservationProvider, useReservation };
+export { EditProvider, useEdit };

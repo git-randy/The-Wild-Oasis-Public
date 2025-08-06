@@ -6,7 +6,7 @@ import {
 } from "~/app/_blueprints/guest";
 import {
   BookedDatesAPIData,
-  BookingAPIData,
+  BookingData,
   BookingWithCabin,
   NewBooking,
   UpdateBookingData,
@@ -121,10 +121,10 @@ export async function getGuestId(
   return data;
 }
 
-export async function getBookingById(id: number) {
+export async function getBookingById(id: number): Promise<BookingWithCabin> {
   const { data, error } = await supabase
     .from("bookings")
-    .select("*")
+    .select("*, cabins(*)")
     .eq("id", id)
     .single();
 
@@ -137,10 +137,9 @@ export async function getBookingById(id: number) {
 }
 
 export async function bookingOwnedByGuest(email: string, bookingId: number) {
+  const guest = await getGuestId(email);
 
-  const guest = await getGuestId(email)
-
-  if (!guest) throw new Error(`Could not find guest id for ${email}`)
+  if (!guest) throw new Error(`Could not find guest id for ${email}`);
 
   const { data, error } = await supabase
     .from("bookings")
@@ -187,7 +186,7 @@ export async function getBookedDatesByCabinId(
   // Getting all bookings
   const { data, error } = await supabase
     .from("bookings")
-    .select("id, start_date, end_date, num_nights")
+    .select("start_date, end_date")
     .eq("cabin_id", cabinId)
     .gte("start_date", today);
 
@@ -281,14 +280,11 @@ export async function updateGuest(
   return data;
 }
 
-export async function updateBooking(
-  id: number,
-  updatedFields: UpdateBookingData
-): Promise<BookingAPIData> {
+export async function updateBooking(booking: UpdateBookingData) {
   const { data, error } = await supabase
     .from("bookings")
-    .update(updatedFields)
-    .eq("id", id)
+    .update(booking)
+    .eq("id", booking.id)
     .select()
     .single();
 

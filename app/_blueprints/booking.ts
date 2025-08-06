@@ -1,7 +1,7 @@
 import { CabinAPIData, CabinData } from "~/app/_blueprints/cabin";
-import { GuestAPIData } from "~/app/_blueprints/guest";
 
-export interface BookingAPIData {
+
+export interface BookingData {
   id: number;
   created_at: string;
   start_date: string;
@@ -10,13 +10,13 @@ export interface BookingAPIData {
   total_price: number;
   num_guests: number;
   status: "unconfirmed" | "checked-in" | "checked-out";
-  has_breakfast?: boolean;
-  extras_price?: number;
-  cabin_price?: number;
-  is_paid?: boolean;
-  observations?: string;
-  cabins?: CabinAPIData;
-  guests?: GuestAPIData;
+  has_breakfast: boolean;
+  extras_price: number;
+  cabin_price: number;
+  is_paid: boolean;
+  observations: string;
+  cabin_id: number;
+  guest_id: number;
 }
 
 export interface BookingWithCabins {
@@ -40,18 +40,21 @@ export interface BookingWithCabin {
   num_nights: number;
   total_price: number;
   num_guests: number;
-  cabins: CabinData;
+  has_breakfast: boolean;
+  extras_price: number;
+  cabin_price: number;
+  is_paid: boolean;
+  status: "unconfirmed" | "checked-in" | "checked-out"
+  observations: string;
+  cabins: CabinAPIData;
   guest_id: number;
   cabin_id: number;
 }
 
-export interface NewBooking
-  extends Omit<BookingAPIData, "id" | "created_at" | "cabins" | "guests"> {
-  cabin_id: number;
-  guest_id: number;
-}
+export type NewBooking = Omit<BookingData, "id" | "created_at">
 
 export interface UpdateBookingData {
+  id: number;
   start_date?: string;
   end_date?: string;
   num_nights?: number;
@@ -60,11 +63,14 @@ export interface UpdateBookingData {
   status?: "unconfirmed" | "checked-in" | "checked-out";
   cabin_id?: number;
   guest_id?: number;
+  has_breakfast?: boolean;
+  is_paid?: boolean;
+  observations?: string;
+  extras_price?: number;
+  cabin_price?: number;
 }
 
 export interface BookedDatesAPIData {
-  id: number;
   start_date: string;
   end_date: string;
-  num_nights: number;
 };

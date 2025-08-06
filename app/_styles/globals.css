@@ -56,7 +56,8 @@
   --rdp-accent-color: theme("colors.accent.500") !important;
   --rdp-background-color: theme("colors.accent.600") !important;
   --rdp-selected-border: 2px solid theme("colors.accent.700") !important;
-  --rdp-range_end-color: red !important;
+  --rdp-range_middle-color: theme("colors.accent.400") !important;
+  --rdp-range_middle-background-color: theme("colors.primary.800") !important;
   margin: 0 !important;
 }
 

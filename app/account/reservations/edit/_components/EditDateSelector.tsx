@@ -1,48 +1,59 @@
 "use client";
 
 import { differenceInDays } from "date-fns";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
-import { BookedDatesAPIData } from "~/app/_blueprints/booking";
+import { BookedDatesAPIData, BookingData } from "~/app/_blueprints/booking";
 import { CabinAPIData } from "~/app/_blueprints/cabin";
 import { SettingsAPIData } from "~/app/_blueprints/settings";
-import { useReservation } from "~/app/_context/ReservationContext";
+import { useEdit } from "~/app/_context/EditContext";
 import { datesOverlap, getBookedDatesByMonth } from "~/app/_lib/utilities";
+import "react-day-picker/dist/style.css";
 
 type DateSelectorProps = {
   settings: SettingsAPIData;
-  bookings: BookedDatesAPIData[];
+  bookedDates: BookedDatesAPIData[];
   cabin: CabinAPIData;
+  customerBooking: BookingData;
 };
 
-function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
+const EditDateSelector = memo(({
+  settings,
+  bookedDates,
+  cabin,
+  customerBooking,
+}: DateSelectorProps) => {
+  const { min_booking_length, max_booking_length } = settings;
+  const { regular_price, discount } = cabin;
   const {
-    reservation,
+    editReservation: edit,
     setDateRange,
     clearDateRange,
-    setCabinName,
-    setCabinId,
     setNumNights,
-  } = useReservation();
-  const { min_booking_length, max_booking_length } = settings;
-  const { regular_price, discount, name: cabinName, id: cabinId } = cabin;
+  } = useEdit();
 
   const currentDate = new Date();
   const farthestReservationDate = new Date(
     currentDate.getFullYear() + 2,
     currentDate.getMonth()
   );
-  const bookedDates = [
-    ...bookings.map((booking) => {
-      return {
-        from: new Date(booking.start_date),
-        to: new Date(booking.end_date),
-      };
-    }),
-  ];
 
-  const disabledDates = [{ before: currentDate }, ...bookedDates];
+  const initialFromDate = new Date(customerBooking.start_date)
+  const initialToDate = new Date(customerBooking.end_date)
+
+  useEffect(() => {
+    setDateRange({from: initialFromDate, to: initialToDate})
+    setNumNights(differenceInDays(initialToDate, initialFromDate))
+  }, [])
+
+  const bookedDatesForDayPicker = bookedDates.map((booking) => {
+    return {
+      from: new Date(booking.start_date),
+      to: new Date(booking.end_date),
+    };
+  });
+
+  const disabledDates = [{ before: new Date() }, ...bookedDatesForDayPicker];
 
   const overlapsBookedDate = (fromDate: Date, toDate: Date) => {
     // Get only booked dates in the relevant month(s) the user has selected instead
@@ -50,7 +61,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
     const relevantDates = getBookedDatesByMonth(
       fromDate.getMonth(),
       toDate.getMonth(),
-      bookedDates
+      bookedDatesForDayPicker
     );
     if (relevantDates.length > 0) {
       const overlaps = relevantDates.map((bookedRange) => {
@@ -66,44 +77,36 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
   };
 
   const handleClear = () => {
-    setNumNights(0)
     clearDateRange();
+    setNumNights(0);
   };
 
   const handleOnSelect = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
       if (overlapsBookedDate(range.from, range.to)) {
-        setDateRange({ from: range.from, to: undefined });
-        setNumNights(0)
+        setDateRange({ from: range.to, to: undefined });
+        setNumNights(0);
         return;
       } else {
         setNumNights(differenceInDays(range.to, range.from));
       }
-    } else {
-      setNumNights(0)
     }
     setDateRange(range);
   };
 
-  useEffect(() => {
-    // Save cabin info for the reminder component into the Reservation context
-    setCabinName(cabinName);
-    setCabinId(cabinId);
-  }, []);
-
   return (
     <div className="flex flex-col justify-between">
       <DayPicker
-        className="pt-12 place-self-center"
+        className="pt-6 place-self-center"
         mode="range"
         onSelect={handleOnSelect}
-        selected={reservation.dateRange}
+        selected={edit.dateRange}
         disabled={disabledDates}
         min={min_booking_length}
         max={max_booking_length}
-        startMonth={currentDate}
+        startMonth={initialFromDate}
         endMonth={farthestReservationDate}
-        captionLayout="dropdown"
+        captionLayout="dropdown-years"
         numberOfMonths={2}
         timeZone="America/New_York"
         styles={{
@@ -115,6 +118,7 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
           disabled: "disabled-date",
         }}
         navLayout="around"
+
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
@@ -132,22 +136,22 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
             )}
             <span className="">/night</span>
           </p>
-          {reservation.numNights ? (
+          {edit.numNights ? (
             <>
               <p className="bg-accent-600 px-3 py-2 text-2xl">
-                <span>&times;</span> <span>{reservation.numNights}</span>
+                <span>&times;</span> <span>{edit.numNights}</span>
               </p>
               <p>
                 <span className="text-lg font-bold uppercase">Total</span>{" "}
                 <span className="text-2xl font-semibold">
-                  ${(regular_price - discount) * reservation.numNights}
+                  ${(regular_price - discount) * edit.numNights}
                 </span>
               </p>
             </>
           ) : null}
         </div>
 
-        {reservation.dateRange?.from || reservation.dateRange?.to ? (
+        {edit.dateRange?.from || edit.dateRange?.to ? (
           <button
             className="border border-primary-800 py-2 px-4 text-sm font-semibold"
             onClick={handleClear}
@@ -159,5 +163,8 @@ function DateSelector({ settings, bookings, cabin }: DateSelectorProps) {
     </div>
   );
 }
+)
 
-export default DateSelector;
+EditDateSelector.displayName = "EditDateSelector"
+
+export default EditDateSelector;

@@ -7,13 +7,15 @@ import {
   bookingOwnedByGuest,
   createBooking,
   deleteBooking,
+  updateBooking,
   updateGuest as updateGuestAPI,
 } from "~/app/_lib/data-service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Reservation } from "~/app/_context/ReservationContext";
-import { NewBooking } from "~/app/_blueprints/booking";
+import { NewBooking, UpdateBookingData } from "~/app/_blueprints/booking";
 import { removeTimezone } from "~/app/_lib/utilities";
+import { EditReservation } from "~/app/_context/EditContext";
 
 const updateGuestSchema = z.object({
   nationality: z.string().check(z.minLength(1, "A country must be selected")),
@@ -33,6 +35,21 @@ async function validateAuthorization() {
     throw new Error("You must be logged in");
   } else {
     return session;
+  }
+}
+
+async function canModifyBooking(
+  email: string | null | undefined,
+  bookingId: number
+) {
+  if (email) {
+    if (await bookingOwnedByGuest(email, bookingId)) {
+      return true
+    } else {
+      throw new Error("Booking cannot be modified by this user");
+    }
+  } else {
+    throw new Error("No email could be found for current user session");
   }
 }
 
@@ -72,7 +89,7 @@ export async function updateGuestAction(
 }
 
 export async function createReservation(reservation: Reservation) {
-  const session = await validateAuthorization()
+  const session = await validateAuthorization();
 
   if (!reservation.dateRange?.from || !reservation.dateRange.to)
     throw new Error("A date range must be selected");
@@ -86,7 +103,7 @@ export async function createReservation(reservation: Reservation) {
     extras_price: 0,
     total_price: reservation.cabinPrice * reservation.numNights,
     status: "unconfirmed",
-    has_breakfast: reservation.hasBreakfast,
+    has_breakfast: reservation?.hasBreakfast || false,
     is_paid: false,
     observations: reservation.observations,
     guest_id: session.guestId,
@@ -94,7 +111,40 @@ export async function createReservation(reservation: Reservation) {
   };
 
   await createBooking(bookingObj);
-  redirect("/account/reservations");
+  redirect("/cabins/thankyou");
+}
+
+export async function updateReservation(reservation: EditReservation) {
+  /*
+    TODO: Check the database to verify another user has not booked
+    an overlapping date at the same time the current user has.
+  */
+  const session = await validateAuthorization();
+
+  if (!reservation.dateRange?.from || !reservation.dateRange.to)
+    throw new Error("A date range must be selected");
+
+  if (!reservation.id) throw new Error("A booking id must be speicifed");
+
+  const bookingObj: UpdateBookingData = {
+    id: reservation.id,
+    start_date: removeTimezone(reservation.dateRange.from),
+    end_date: removeTimezone(reservation.dateRange.to),
+    num_nights: reservation.numNights,
+    num_guests: reservation.guests,
+    cabin_price: reservation.cabinPrice,
+    extras_price: 0,
+    total_price: reservation.cabinPrice * reservation.numNights,
+    has_breakfast: reservation?.hasBreakfast || false,
+    observations: reservation.observations,
+    guest_id: session.guestId,
+  };
+
+  if (await canModifyBooking(session.user?.email, bookingObj.id)){
+    await updateBooking(bookingObj);
+    revalidatePath("/account/reservations")
+    redirect("/account/reservations")
+  }
 }
 
 export async function deleteReservation(bookingId: number) {

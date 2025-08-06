@@ -1,9 +1,9 @@
 import Link from "next/link";
-import ReservationCard from "@components/ReservationCard";
 import { auth } from "~/app/_lib/auth";
 import { BookingWithCabin } from "~/app/_blueprints/booking";
 import { getBookings, getGuest } from "~/app/_lib/data-service";
 import { GuestAPIData } from "~/app/_blueprints/guest";
+import ReservationList from "~/app/_components/ReservationList";
 
 export const metadata = {
   title: "Reservations",
@@ -32,11 +32,7 @@ export default async function Page() {
           </Link>
         </p>
       ) : (
-        <ul className="space-y-6">
-          {bookings.map((booking) => (
-            <ReservationCard booking={booking} key={booking.id} />
-          ))}
-        </ul>
+        <ReservationList bookings={bookings}/>
       )}
     </div>
   );
