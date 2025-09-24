@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import AISupportChat from "~/app/_components/AISupportChat";
 import CabinList from "~/app/_components/CabinList";
 import Filter from "~/app/_components/Filter";
 import ReservationReminder from "~/app/_components/ReservationReminder";
@@ -52,6 +53,7 @@ export default async function Page({
       >
         <CabinList filter={filter}/>
         <ReservationReminder/>
+        <AISupportChat/>
       </Suspense>
     </div>
   );
