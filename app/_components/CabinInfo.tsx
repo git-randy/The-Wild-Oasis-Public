@@ -2,7 +2,7 @@ import { EyeSlashIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CabinData } from "~/app/_blueprints/cabin";
 import TextExpander from "~/app/_components/TextExpander";
-import noImage from "~/public/no-image.jpg";
+import noImage from "~/public/no-image.jpg"
 
 function CabinInfo({ cabin }: { cabin: CabinData }) {
   const { max_capacity, image, name, description } = cabin;

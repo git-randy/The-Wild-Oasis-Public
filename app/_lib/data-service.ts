@@ -6,7 +6,6 @@ import {
 } from "~/app/_blueprints/guest";
 import {
   BookedDatesAPIData,
-  BookingData,
   BookingWithCabin,
   NewBooking,
   UpdateBookingData,
@@ -56,7 +55,7 @@ export const getCabins = async function (): Promise<CabinAPIData[]> {
 
   if (error) {
     console.error(error);
-    throw new Error("Cabins could not be loaded");
+    throw new Error(`Cabins could not be loaded`);
   }
 
   return data;

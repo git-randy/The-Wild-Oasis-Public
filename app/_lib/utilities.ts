@@ -56,5 +56,4 @@ export function removeTimezone(date: Date): string {
   } else {
     return date.toISOString().split(".")[0].replace("T", " ")
   }
-
 }
