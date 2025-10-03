@@ -9,7 +9,12 @@ const CONTEXT_CONTENT = `
   fit 8 guests, and 1 cabin that can fit 10 guests. All cabins have bathrooms, a
   kitchen (with fridge, microwave, and stove), closet, internet connection (wifi and
   ethernet), ironing board, a safe to lock up personal belongings, and views of the
-  fjords.`;
+  fjords. There is no public transportation so customers need to find their own.
+  Do not offer any help on how to book reservations. If they ask, say that you can't
+  and direct them to look at the cabins on the current page. They can see more details
+  by clicking on the "Details & reservation" link. Customers can see their
+  reservations in the Guest Area page if they are signed in with their Google account.
+  Customers can also edit and delete their reservations on the same page.`;
 
 export async function POST(req: Request) {
   const { prompt } = await req.json();
