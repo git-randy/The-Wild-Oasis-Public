@@ -57,3 +57,17 @@ export function removeTimezone(date: Date): string {
     return date.toISOString().split(".")[0].replace("T", " ")
   }
 }
+
+export function getLocalTime(format: string): string {
+  /**
+   * Uses the toLocalTimeString function of Date
+   */
+
+  const now = new Date().toLocaleTimeString(format, {
+    hour:"numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return now
+}

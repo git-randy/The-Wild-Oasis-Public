@@ -7,7 +7,7 @@ import { SessionProvider } from "next-auth/react";
 
 const josefinSansFont = Josefin_Sans({
   subsets: ["latin"],
-  display: "swap",
+  display: "block",
 });
 
 export const metadata = {
